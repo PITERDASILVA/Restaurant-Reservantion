@@ -1,9 +1,10 @@
+from datetime import datetime
+
 class Costumer():
     def __init__(self, name, phone, email):
         self.name = name
         self.phone = int(phone)
         self.email = email
-
 
 
 class Table():
@@ -18,6 +19,7 @@ class Table():
             return True
         return False
     
+    
     def cancel_reservation(self):
         if self.reserved:
             self.reserved = False
@@ -31,17 +33,20 @@ class Table():
                 f"Status: {status_table}")
     
 class Reservation():
-    def __init__(self, ocassion, table, date, time):
+    def __init__(self, ocassion, table, date, time, costumer_name):
         self.ocassion = ocassion
         self.table = table
         self.date = date
         self.time = time 
+        self.costumer_name = costumer_name
+
 
     def __str__(self):
-        return (f"Table: {self.table}\n"
-                f"Number of People: {self.ocassion}\n"
-                f"Date: {self.date}\n"
-                f"Time: {self.time}")
+        return (f"Number of People: {self.table}\n"
+                f"Costumer: {self.costumer_name}\n"
+                f"Ocassion: {self.ocassion}\n"
+                f"Date: {self.date.strftime('%d/%m/%Y')}\n"
+                f"Time: {self.time.strftime('%H:%M')}")
 
 class Restaurant():
     def __init__(self):
@@ -49,9 +54,12 @@ class Restaurant():
         self.reservations = []
         self.costumers = []
 
+    def add_costumer_details(self, costumer):
+        self.costumers.append(costumer)
+
     def table_list(self):
         for i, table in enumerate(self.tables, 1):
-            print(f'{i}. {table}')
+            print(f' {table}')
 
     def add_reservation(self, reservation):
         self.reservations.append(reservation)
@@ -85,7 +93,7 @@ class Restaurant():
 
     def reservation_list(self):
         for i, reservation in enumerate(self.reservations, 1):
-            print(f'{i}. {reservation}')
+            print(f'{reservation}')
     
     
 def table_menu():
@@ -105,17 +113,46 @@ def main():
         
         if choice == '1':
             restaurant.table_list()
+            
             table_number = int(input("Enter the table number: "))
-            restaurant.table_reservation(table_number)
-            print("Reservation Details")
-            print("------------------")
-            ocassion = input("Enter the ocassion: ")
-            table = input("Enter the table number: ")
-            date = input("Enter the date: ")
-            time = input("Enter the time: ")
-            reservation = Reservation(ocassion, table, date, time)
-            restaurant.add_reservation(reservation)
-            print("Table reserved successfully.")
+            if restaurant.table_reservation(table_number):
+                print("Reservation Details")
+                print("------------------")
+                ocassion = input("Enter the ocassion: ")
+                table = int(input("Quantity of people: "))
+                while True:
+                    date_str = input("Enter the date: ")
+                    try:
+                        date = datetime.strptime(date_str, "%d/%m/%Y")
+                        if date < datetime.now():
+                            print("Invalid date. Try again: ")
+                        else:
+                            break
+                    except ValueError:
+                        print("Invalid date. Try again: ")
+
+                while True:
+                    time_str = input("Enther the time:")
+                    try:
+                        time = datetime.strptime(time_str, "%H:%M").time()
+                        break
+                    except ValueError:
+                        print("Invalid time. Try again: ")
+
+                print("Costumer Details: ")
+                name = input("Name: ")
+                phone = int(input("Phome Number: "))
+                email = input("Email: ")
+                costumerDetails = Costumer(name, phone, email)
+                restaurant.add_costumer_details(costumerDetails)
+                reservation = Reservation(ocassion, table, date, time, costumer_name=name)
+                restaurant.add_reservation(reservation)
+                print("Table reserved successfully.")
+              
+            else:
+                print("Please choose another table.")
+                
+
 
         elif choice == '2':
             table_number = int(input("Enter the table number: "))
